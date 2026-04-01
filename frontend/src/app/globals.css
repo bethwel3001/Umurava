@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1E3A8A;
+  --color-primary-hover: #3B82F6;
+  --color-secondary: #14B8A6;
+  --color-accent: #F59E0B;
+  --color-error: #EF4444;
+  --color-success: #10B981;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --muted: #64748b;
+    --border: transparent;
+  }
+
+  .dark {
+    --background: #0F172A;
+    --foreground: #f8fafc;
+    --muted: #94a3b8;
+    --border: transparent;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button, a, select, input[type="checkbox"], input[type="radio"], .cursor-pointer, svg {
+  cursor: pointer;
+}
+
+@layer components {
+  .text-muted-content { color: var(--muted); }
+  
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 bg-slate-50 dark:bg-white/5 text-[var(--foreground)] border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-[var(--muted)];
+  }
+
+  /* Remove card styling as requested */
+  .card, .card-flat {
+    @apply bg-transparent border-none p-0 transition-all;
+  }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-white/10 rounded-full;
+}
