@@ -1,6 +1,6 @@
-# How Umurava AI works
+# How UMU AI works
 
-This guide explains the workflow and features of the Umurava AI talent screening tool for its two primary user roles.
+This guide explains the workflow and features of the UMU AI talent screening tool for its two primary user roles.
 
 ---
 

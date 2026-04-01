@@ -1,13 +1,13 @@
-# Umurava AI - Talent Screening Tool
+# UMU AI - Talent Screening Tool
 
-Umurava AI is an AI-powered talent profile screening tool built for the Human Resources industry. It uses Gemini AI to analyze job requirements and shortlist candidates from both structured profiles and unstructured resumes.
+UMU AI is an AI-powered talent profile screening tool built for the Human Resources industry. It uses Gemini AI to analyze job requirements and shortlist candidates from both structured profiles and unstructured resumes.
 
 ## Features
 - **Job Management**: Create and manage job openings with specific requirements and skills.
 - **AI Resume Parsing**: Paste unstructured resume text and let Gemini extract contact info, skills, experience, and education.
 - **Intelligent Screening**: Screen multiple candidates against a job description using Gemini Pro.
 - **Ranked Shortlists**: View top candidates with match scores, strengths, gaps, and AI-generated reasoning.
-- **Modern UI**: Clean, professional dashboard built with Next.js and Tailwind CSS (following Umurava design guidelines).
+- **Modern UI**: Clean, professional dashboard built with Next.js and Tailwind CSS (following UMU design guidelines).
 
 ## Tech Stack
 - **Frontend**: Next.js 14, Redux Toolkit, Tailwind CSS, Lucide React.

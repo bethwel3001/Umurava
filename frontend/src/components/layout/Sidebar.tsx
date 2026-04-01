@@ -74,7 +74,7 @@ export default function Sidebar() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
                 <Cpu className="text-white" size={18} />
               </div>
-              <span className="text-lg font-bold tracking-tight text-[var(--foreground)] font-poppins">Umurava AI</span>
+              <span className="text-lg font-bold tracking-tight text-[var(--foreground)] font-poppins">UMU AI</span>
             </div>
           )}
           {collapsed && (

@@ -34,7 +34,7 @@ export const parseResume = createAsyncThunk('applicants/parse', async (resumeTex
   // Also create the applicant in the database immediately
   const createResponse = await axios.post(API_URL, {
     name: parsedData.Name || 'Unknown Applicant',
-    email: parsedData.Email || `talent-${Date.now()}@umurava.ai`,
+    email: parsedData.Email || `talent-${Date.now()}@umu.ai`,
     phone: parsedData.Phone,
     parsedData: parsedData
   });
@@ -51,7 +51,7 @@ export const uploadResume = createAsyncThunk('applicants/upload', async (file: F
   
   const createResponse = await axios.post(API_URL, {
     name: parsedData.Name || 'Unknown Applicant',
-    email: parsedData.Email || `talent-${Date.now()}@umurava.ai`,
+    email: parsedData.Email || `talent-${Date.now()}@umu.ai`,
     phone: parsedData.Phone,
     parsedData: parsedData
   });

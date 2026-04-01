@@ -20,7 +20,7 @@ connectDB();
 
 // Routes
 app.get('/', (req: Request, res: Response) => {
-  res.send('Umurava AI Backend API');
+  res.send('UMU AI Backend API');
 });
 
 app.use('/api/jobs', jobRoutes);

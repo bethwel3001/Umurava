@@ -53,7 +53,7 @@ app.use(express_1.default.json());
 (0, db_1.connectDB)();
 // Routes
 app.get('/', (req, res) => {
-    res.send('Umurava AI Backend API');
+    res.send('UMU AI Backend API');
 });
 app.use('/api/jobs', job_routes_1.default);
 app.use('/api/applicants', applicant_routes_1.default);

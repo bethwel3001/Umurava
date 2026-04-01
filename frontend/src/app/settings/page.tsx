@@ -55,7 +55,7 @@ export default function SettingsPage() {
                 <>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-content">Organization</label>
-                    <input type="text" defaultValue="Umurava AI" className="input-field" />
+                    <input type="text" defaultValue="UMU AI" className="input-field" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-content">Language</label>

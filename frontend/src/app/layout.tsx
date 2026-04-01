@@ -13,7 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Umurava AI - Talent Screening",
+  title: "UMU AI - Talent Screening",
   description: "AI-powered talent profile screening tool",
 };
 
