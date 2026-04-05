@@ -15,7 +15,12 @@ import {
   Users,
   Sparkles,
   ChevronRight,
-  FileUp
+  FileUp,
+  X,
+  Briefcase,
+  GraduationCap,
+  Wand2,
+  AlertCircle
 } from 'lucide-react';
 import { parseResume, fetchApplicants, uploadResume } from '@/store/slices/applicantSlice';
 
@@ -25,9 +30,10 @@ export default function ApplicantsPage() {
   const [resumeText, setResumeText] = useState('');
   const [parsing, setParsing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [parseSuccess, setParseSuccess] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const parserSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     dispatch(fetchApplicants());
@@ -36,13 +42,14 @@ export default function ApplicantsPage() {
   const handleParseResume = async () => {
     if (!resumeText) return;
     setParsing(true);
-    setParseSuccess(false);
     try {
-      await dispatch(parseResume(resumeText)).unwrap();
+      console.log('Starting resume parse...');
+      const result = await dispatch(parseResume(resumeText)).unwrap();
+      console.log('Parse result:', result);
       setResumeText('');
-      setParseSuccess(true);
-      setTimeout(() => setParseSuccess(false), 5000);
-      dispatch(fetchApplicants());
+      await dispatch(fetchApplicants());
+      console.log('Applicants refreshed after parse');
+      triggerSuccess();
     } catch (error) {
       console.error('Error parsing resume:', error);
     } finally {
@@ -55,13 +62,14 @@ export default function ApplicantsPage() {
     if (!file) return;
 
     setUploading(true);
-    setParseSuccess(false);
     try {
-      await dispatch(uploadResume(file)).unwrap();
-      setParseSuccess(true);
-      setTimeout(() => setParseSuccess(false), 5000);
-      dispatch(fetchApplicants());
+      console.log('Starting PDF upload:', file.name);
+      const result = await dispatch(uploadResume(file)).unwrap();
+      console.log('Upload result:', result);
+      await dispatch(fetchApplicants());
+      console.log('Applicants refreshed after upload');
       if (fileInputRef.current) fileInputRef.current.value = '';
+      triggerSuccess();
     } catch (error) {
       console.error('Error uploading resume:', error);
     } finally {
@@ -69,74 +77,118 @@ export default function ApplicantsPage() {
     }
   };
 
+  const triggerSuccess = () => {
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 5000);
+  };
+
+  const scrollToParser = () => {
+    parserSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    parserSectionRef.current?.classList.add('ring-4', 'ring-primary/20');
+    setTimeout(() => {
+      parserSectionRef.current?.classList.remove('ring-4', 'ring-primary/20');
+    }, 2000);
+  };
+
   const filteredApplicants = applicants.filter((app: any) => 
-    app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.email.toLowerCase().includes(searchTerm.toLowerCase())
+    app.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="space-y-8 animate-in">
+    <div className="space-y-8 animate-in relative pb-20">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-10 duration-500">
+          <div className="bg-success text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold border-4 border-white/20">
+            <CheckCircle2 size={24} />
+            Candidate parsed & saved to Talent Pool
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Talent pool</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Talent Pool</h1>
           <p className="text-muted-content font-medium">Manage candidate profiles and analyze new resumes with AI.</p>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center">
-          <UserPlus size={18} />
-          Add candidate
+        <button 
+          onClick={scrollToParser}
+          className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center group"
+        >
+          <UserPlus size={18} className="group-hover:rotate-12 transition-transform" />
+          Add Candidate
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-content" size={20} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-content" size={20} />
               <input 
                 type="text" 
-                placeholder="Search candidates..." 
+                placeholder="Search by name or email..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field pl-10 h-11"
+                className="input-field pl-12 h-14 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10"
               />
             </div>
           </div>
 
           <div className="p-0 overflow-hidden">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                <Loader2 className="animate-spin text-primary" size={40} />
-                <p className="text-muted-content font-bold">Synchronizing talent pool...</p>
+              <div className="flex flex-col items-center justify-center py-24 space-y-4">
+                <Loader2 className="animate-spin text-primary" size={48} />
+                <p className="text-muted-content font-black uppercase tracking-widest text-[10px]">Syncing Talent Pool...</p>
               </div>
             ) : filteredApplicants.length === 0 ? (
-              <div className="text-center py-24 border-2 border-dashed border-[var(--border)] rounded-2xl">
-                <Users size={48} className="mx-auto text-muted-content/20 mb-4" />
-                <p className="text-muted-content italic">No matching candidates found.</p>
+              <div className="text-center py-32 border-4 border-dashed border-slate-100 dark:border-white/5 rounded-[40px]">
+                <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Users size={40} className="text-muted-content/20" />
+                </div>
+                <h3 className="text-lg font-bold">No candidates found</h3>
+                <p className="text-muted-content font-medium mt-2">Upload a resume or paste text to build your pool.</p>
               </div>
             ) : (
-              <div className="divide-y divide-[var(--border)]">
+              <div className="grid grid-cols-1 gap-4">
                 {filteredApplicants.map((applicant: any) => (
-                  <div key={applicant._id} className="p-5 hover:bg-primary/5 transition-colors flex flex-col sm:flex-row sm:items-center gap-4 group">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-lg shrink-0">
-                      {applicant.name.charAt(0)}
+                  <div key={applicant._id} className="p-6 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[32px] hover:shadow-xl hover:shadow-primary/5 transition-all group flex flex-col md:flex-row md:items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                      {applicant.name?.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold truncate group-hover:text-primary transition-colors">{applicant.name}</h3>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                        <p className="text-xs text-muted-content flex items-center gap-1.5 truncate font-bold">
-                          <Mail size={12} className="shrink-0" />
+                      <h3 className="text-xl font-black truncate group-hover:text-primary transition-colors uppercase tracking-tight">{applicant.name}</h3>
+                      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">
+                        <p className="text-sm text-muted-content flex items-center gap-2 font-bold">
+                          <Mail size={14} className="text-primary/40" />
                           {applicant.email}
                         </p>
                         {applicant.phone && (
-                          <p className="text-xs text-muted-content flex items-center gap-1.5 shrink-0 font-bold">
-                            <Phone size={12} className="shrink-0" />
+                          <p className="text-sm text-muted-content flex items-center gap-2 font-bold">
+                            <Phone size={14} className="text-primary/40" />
                             {applicant.phone}
                           </p>
                         )}
                       </div>
+                      
+                      {applicant.parsedData?.Skills && (
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          {applicant.parsedData.Skills.slice(0, 4).map((skill: string, i: number) => (
+                            <span key={i} className="text-[9px] font-black uppercase tracking-wider px-2 py-1 bg-slate-100 dark:bg-white/10 rounded-md">
+                              {skill}
+                            </span>
+                          ))}
+                          {applicant.parsedData.Skills.length > 4 && (
+                            <span className="text-[9px] font-black uppercase tracking-wider px-2 py-1 bg-primary/5 text-primary rounded-md">
+                              +{applicant.parsedData.Skills.length - 4} More
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <button className="flex items-center gap-1 text-xs font-bold text-muted-content hover:text-primary transition-colors">
-                      Profile <ChevronRight size={14} />
+                    <button className="h-12 px-6 bg-slate-50 dark:bg-white/5 hover:bg-primary hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shrink-0">
+                      Profile <ChevronRight size={16} />
                     </button>
                   </div>
                 ))}
@@ -146,80 +198,93 @@ export default function ApplicantsPage() {
         </div>
 
         <div className="space-y-6 order-1 lg:order-2">
-          <div className="bg-primary/5 p-8 rounded-3xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Sparkles size={60} />
+          <div 
+            ref={parserSectionRef}
+            className="bg-primary/5 dark:bg-white/5 p-10 rounded-[48px] relative overflow-hidden transition-all duration-500 border border-primary/10 shadow-2xl shadow-primary/5"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Sparkles size={150} />
             </div>
             
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
-              <FileText className="text-secondary" size={18} />
-              AI parser
-            </h2>
-            <p className="text-xs text-muted-content font-bold mb-6 relative z-10 leading-relaxed">
-              Extract candidate data instantly from text or PDF.
-            </p>
-            
-            {parseSuccess && (
-              <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-xl flex items-center gap-2 text-success text-[10px] font-bold animate-in fade-in">
-                <CheckCircle2 size={16} />
-                Profile added
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary flex items-center justify-center">
+                  <Wand2 size={18} />
+                </div>
+                <h2 className="text-2xl font-black uppercase tracking-tight">AI Parser</h2>
               </div>
-            )}
-
-            <div className="relative z-10 space-y-4">
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-primary/20 rounded-2xl p-6 text-center hover:bg-primary/5 transition-colors cursor-pointer group"
-              >
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  className="hidden" 
-                  accept=".pdf"
-                />
-                {uploading ? (
-                  <Loader2 className="animate-spin mx-auto text-primary mb-2" size={24} />
-                ) : (
-                  <FileUp className="mx-auto text-primary/40 group-hover:text-primary mb-2 transition-colors" size={24} />
-                )}
-                <p className="text-xs font-bold text-primary">
-                  {uploading ? 'Parsing CV...' : 'Upload PDF resume'}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4 text-muted-content">
-                <div className="h-px flex-1 bg-[var(--border)]" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">or paste text</span>
-                <div className="h-px flex-1 bg-[var(--border)]" />
-              </div>
-
-              <textarea 
-                rows={6}
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                placeholder="Paste resume text here..." 
-                className="input-field text-sm resize-none"
-              ></textarea>
+              <p className="text-xs text-muted-content font-bold mb-10 leading-relaxed uppercase tracking-widest">
+                Automated extraction of name, contact, skills, and experience.
+              </p>
               
-              <button 
-                onClick={handleParseResume}
-                disabled={parsing || !resumeText || uploading}
-                className="w-full btn-primary flex items-center justify-center gap-2 group h-12"
-              >
-                {parsing ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={18} className="group-hover:-translate-y-1 transition-transform" />
-                    Process text
-                  </>
-                )}
-              </button>
+              <div className="space-y-8">
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-4 border-dashed border-primary/20 rounded-[32px] p-10 text-center hover:bg-primary/5 dark:hover:bg-white/5 transition-all cursor-pointer group hover:border-primary/40 bg-white/50 dark:bg-black/20"
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    className="hidden" 
+                    accept=".pdf"
+                  />
+                  {uploading ? (
+                    <Loader2 className="animate-spin mx-auto text-primary mb-4" size={40} />
+                  ) : (
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                      <FileUp className="text-primary" size={32} />
+                    </div>
+                  )}
+                  <p className="text-sm font-black text-primary uppercase tracking-widest">
+                    {uploading ? 'Analyzing PDF...' : 'Drop PDF Resume'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 text-muted-content/20">
+                  <div className="h-px flex-1 bg-current" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Manual Entry</span>
+                  <div className="h-px flex-1 bg-current" />
+                </div>
+
+                <div className="space-y-4">
+                  <textarea 
+                    rows={8}
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                    placeholder="Paste resume content here..." 
+                    className="input-field text-sm font-bold resize-none py-6 leading-relaxed bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10"
+                  ></textarea>
+                  
+                  <button 
+                    onClick={handleParseResume}
+                    disabled={parsing || !resumeText || uploading}
+                    className="w-full btn-primary flex items-center justify-center gap-3 group h-16 rounded-[20px] shadow-xl shadow-primary/30 text-base font-black uppercase tracking-widest"
+                  >
+                    {parsing ? (
+                      <>
+                        <Loader2 size={24} className="animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={24} className="group-hover:-translate-y-1 transition-transform" />
+                        Process Talent
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div className="p-8 bg-accent/5 rounded-[32px] border border-accent/10">
+            <h4 className="text-[10px] font-black text-accent uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <AlertCircle size={14} /> Extraction Quality
+            </h4>
+            <p className="text-xs font-bold text-muted-content leading-relaxed">
+              Our AI engine identifies roles and skills even in complex layouts. For best results, ensure the PDF is text-searchable.
+            </p>
           </div>
         </div>
       </div>

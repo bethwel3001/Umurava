@@ -15,12 +15,21 @@ export class GeminiService {
   }
 
   private loadKeys() {
-    // 1. Load from backend/.env (standard way)
-    if (process.env.GEMINI_API_KEY) {
-      this.keys.push(process.env.GEMINI_API_KEY);
+    // 1. Load from GEMINI_API_KEY or GEMINI_API_KEYS (comma-separated)
+    const primaryKey = process.env.GEMINI_API_KEY;
+    const additionalKeys = process.env.GEMINI_API_KEYS;
+
+    if (primaryKey) {
+      this.keys.push(primaryKey);
     }
 
-    // 2. Load from root .env (list of keys)
+    if (additionalKeys) {
+      const splitKeys = additionalKeys.split(',').map(k => k.trim()).filter(k => k);
+      this.keys.push(...splitKeys);
+    }
+
+    // 2. Load from root .env or a dedicated keys file
+    // We only take lines that look like valid API keys (Gemini 'AIza' or OpenAI 'sk-')
     try {
       const rootEnvPath = path.resolve(process.cwd(), '../.env');
       if (fs.existsSync(rootEnvPath)) {
@@ -28,18 +37,34 @@ export class GeminiService {
         const rootKeys = rootEnvContent
           .split('\n')
           .map(line => line.trim())
-          .filter(line => line && !line.startsWith('#'));
+          .filter(line => {
+            // Check if it's a direct key (starts with AIza or sk-)
+            if (line.startsWith('AIza') || line.startsWith('sk-')) return true;
+            
+            // Check if it's an assignment like KEY=AIza...
+            if (line.includes('=')) {
+              const val = line.split('=')[1]?.trim();
+              return val && (val.startsWith('AIza') || val.startsWith('sk-'));
+            }
+            
+            return false;
+          })
+          .map(line => {
+            if (line.includes('=')) return line.split('=')[1]?.trim();
+            return line;
+          });
+          
         this.keys.push(...rootKeys);
       }
     } catch (error) {
-      console.error('Error loading root .env keys:', error);
+      console.error('Error loading extra keys from root:', error);
     }
 
-    // Remove duplicates
-    this.keys = [...new Set(this.keys)];
+    // Remove duplicates and filter empty
+    this.keys = [...new Set(this.keys)].filter(k => k);
     
     if (this.keys.length === 0) {
-      console.warn('No API keys found in backend/.env or root .env');
+      console.warn('No API keys found. Please check GEMINI_API_KEY in backend/.env');
     } else {
       console.log(`Loaded ${this.keys.length} API keys for rotation.`);
     }
@@ -126,25 +151,52 @@ export class GeminiService {
    */
   async parseResume(text: string): Promise<any> {
     const prompt = `
-      Extract the following information from the resume text into a JSON format:
-      - Name
-      - Email
-      - Phone
-      - Skills (array of strings)
-      - Experience (array of objects with title, company, duration, description)
-      - Education (array of objects with degree, institution, year)
-      - Summary
+      You are an expert HR Data Parser. Extract the following information from the resume text into a strict JSON format.
+      
+      Fields to extract:
+      - name: Full name of the candidate
+      - email: Email address
+      - phone: Phone number
+      - skills: A comprehensive list of technical and soft skills as an array of strings
+      - experience: An array of objects, each containing:
+          - title: Job title
+          - company: Company name
+          - duration: Date range (e.g., "Jan 2020 - Present")
+          - description: Brief summary of responsibilities
+      - education: An array of objects, each containing:
+          - degree: Degree name (e.g., "BSc Computer Science")
+          - institution: University or school name
+          - year: Graduation year
+      - summary: A 2-3 sentence professional summary
 
+      If a field is not found, use null for strings and [] for arrays.
+      
       Resume Text:
+      """
       ${text}
+      """
 
-      Return ONLY the JSON object.
+      Return ONLY the JSON object. Do not include any markdown formatting like \`\`\`json.
     `;
 
     try {
       const responseText = await this.callLLM(prompt);
+      console.log('Raw LLM Response for Parsing:', responseText);
+      
+      // Clean the response: remove markdown code blocks if present
       const jsonStr = responseText.replace(/```json|```/g, '').trim();
-      return JSON.parse(jsonStr);
+      const parsed = JSON.parse(jsonStr);
+      
+      // Normalize field names (ensure consistent casing)
+      return {
+        Name: parsed.name || parsed.Name || "Unknown Applicant",
+        Email: parsed.email || parsed.Email || null,
+        Phone: parsed.phone || parsed.Phone || null,
+        Skills: parsed.skills || parsed.Skills || [],
+        Experience: parsed.experience || parsed.Experience || [],
+        Education: parsed.education || parsed.Education || [],
+        Summary: parsed.summary || parsed.Summary || ""
+      };
     } catch (error: any) {
       console.error('Parsing Error:', error);
       
@@ -153,7 +205,7 @@ export class GeminiService {
         return this.getMockParsedData(text);
       }
       
-      throw new Error('Failed to parse resume');
+      throw new Error('Failed to parse resume: ' + error.message);
     }
   }
 

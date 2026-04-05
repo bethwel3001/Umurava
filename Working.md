@@ -10,31 +10,22 @@ The platform serves as a high-efficiency **Recruiter console**, designed to redu
 
 ### Workspace management
 *   **Centralized dashboard**: View real-time analytics on active job openings, total candidate pool, and recent screening activity.
-*   **Job creation**: Easily define new roles by providing titles, descriptions, specific technical requirements, and desired experience levels.
+*   **Job lifecycle**: Create, edit, and manage job openings. Archive or end postings directly from the dashboard.
 
 ### Talent pool & ingestion
-*   **AI resume parsing**: Recruiters can paste raw resume text into the system. Our Gemini-powered engine instantly extracts structured data including contact info, skills, experience, and education.
-*   **Candidate management**: Browse and search through the entire talent pool to find specific profiles or evaluate historical data.
+*   **AI resume parsing**: Recruiters can upload PDF resumes or paste raw text. Our engine instantly extracts structured data including contact info, skills, experience, and education.
+*   **Candidate profiles**: Every parsed candidate is instantly synchronized to the talent pool with automated skill tagging.
 
 ### AI-powered screening
-*   **Intelligent matching**: Select a batch of candidates and run them against a specific job description. 
-*   **Shortlist generation**: The AI analyzes multiple candidates at once, producing a ranked list based on relevance.
-*   **Explainable reasoning**: For every shortlisted candidate, the recruiter can see:
-    *   **Match score**: A percentage-based technical fit score.
-    *   **Strengths & gaps**: Bulleted lists of where the candidate excels or where risks/gaps exist.
-    *   **Final recommendation**: A human-readable verdict (e.g., "Strongly recommend") to guide the final hiring decision.
+*   **Targeted evaluation**: Select a specific job and a batch of candidates to run a deep AI evaluation.
+*   **Intelligent ranking**: The AI ranks candidates based on match score, connection to specific requirements, and potential risks.
+*   **Explainable reasoning**: For every candidate, the AI provides a detailed reasoning summary to justify its recommendation.
 
 ---
 
-## 2. For job hunters
+## 2. Technical Integrity
 
-While the core of this prototype is the recruiter-facing console, the underlying system is designed to ensure job hunters are evaluated fairly and accurately.
-
-### Automated profile building
-*   **Effortless application**: Instead of manual data entry, the system's AI parser ensures that their unstructured resumes are accurately converted into professional, structured profiles.
-*   **Skill recognition**: The AI identifies latent skills and experience within a resume that might be missed by traditional keyword-based ATS systems.
-
-### Objective evaluation
-*   **Bias reduction**: Candidates are evaluated based on the objective requirements of the job description, with the AI focusing on technical fit, experience, and education relevance.
-*   **High-signal visibility**: Top talent is automatically "bubbled up" to recruiters, ensuring that highly qualified candidates don't get lost in high-volume application piles.
-*   **Quality feedback loop**: Through the AI reasoning engine, candidates are evaluated against specific strengths and gaps, which recruiters can use to provide more meaningful feedback or make better-informed selection choices.
+### Robust AI Engine
+*   **Failover mechanism**: The system automatically detects API failures or quota limits.
+*   **Multi-model support**: Seamlessly switches between Google Gemini and OpenAI models to ensure continuous service.
+*   **Key rotation**: Efficiently utilizes multiple API keys to maximize throughput.

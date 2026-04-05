@@ -1,26 +1,28 @@
 # UMU AI - Talent Screening Tool
 
-UMU AI is an AI-powered talent profile screening tool built for the Human Resources industry. It uses Gemini AI to analyze job requirements and shortlist candidates from both structured profiles and unstructured resumes.
+UMU AI is an AI-powered talent profile screening tool built for the Human Resources industry. It uses Gemini AI (with OpenAI fallback) to analyze job requirements and shortlist candidates from both structured profiles and unstructured resumes.
 
 ## Features
 - **Job Management**: Create and manage job openings with specific requirements and skills.
-- **AI Resume Parsing**: Paste unstructured resume text and let Gemini extract contact info, skills, experience, and education.
-- **Intelligent Screening**: Screen multiple candidates against a job description using Gemini Pro.
+- **AI Resume Parsing**: Upload PDF resumes or paste unstructured text. Our AI extracts contact info, skills, experience, and education automatically.
+- **Robust AI Engine**: Multi-key rotation and automatic fallback between Gemini and OpenAI models to ensure 100% uptime.
+- **Intelligent Screening**: Screen multiple candidates against a job description using deep reasoning.
 - **Ranked Shortlists**: View top candidates with match scores, strengths, gaps, and AI-generated reasoning.
-- **Modern UI**: Clean, professional dashboard built with Next.js and Tailwind CSS (following UMU design guidelines).
+- **Modern UI**: Clean, professional dashboard with Dark/Light mode support.
 
 ## Tech Stack
-- **Frontend**: Next.js 14, Redux Toolkit, Tailwind CSS, Lucide React.
+- **Frontend**: Next.js 15 (App Router), Redux Toolkit, Tailwind CSS, Lucide React.
 - **Backend**: Node.js, Express, TypeScript, Mongoose.
-- **AI**: Google Gemini Pro.
+- **AI**: Google Gemini 1.5 Flash & OpenAI GPT-4o-mini.
 - **Database**: MongoDB.
 
 ## Getting Started
 
 ### 1. Prerequisites
-- Node.js (v18+)
+- Node.js (v20+)
 - MongoDB (Running locally or an Atlas URI)
-- Gemini API Key ([Get one here](https://aistudio.google.com/))
+- Gemini API Key ([Google AI Studio](https://aistudio.google.com/))
+- (Optional) OpenAI API Key
 
 ### 2. Backend Setup
 ```bash
@@ -41,8 +43,5 @@ npm run dev
 ### 4. Access the App
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Design Specifications (from GEMINI.md)
-- **Primary Color**: #1E3A8A (Deep Blue)
-- **Secondary Color**: #14B8A6 (Teal)
-- **Accent Color**: #F59E0B (Amber)
-- **Fonts**: Inter, Poppins, Roboto Mono.
+## Key Rotation logic
+The system can load multiple API keys from `GEMINI_API_KEYS` (comma-separated) or a `.env` file in the root directory. It automatically rotates to the next key if a quota limit or error occurs.

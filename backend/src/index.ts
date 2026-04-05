@@ -23,6 +23,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send('UMU AI Backend API');
 });
 
+app.get('/api/test-direct', (req, res) => res.json({ message: 'Direct success' }));
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applicants', applicantRoutes);
 app.use('/api/stats', statsRoutes);
